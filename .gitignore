@@ -353,3 +353,7 @@ MigrationBackup/
 
 # V8
 v8/
+
+# Other Visual Studio Files
+.vcxproj
+.vcxproj.filters
