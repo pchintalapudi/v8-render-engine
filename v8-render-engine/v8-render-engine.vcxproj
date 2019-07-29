@@ -81,8 +81,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\prem\Documents\browser\v8;C:\Users\prem\Documents\browser\v8\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\prem\Documents\browser\v8;C:\Users\prem\Documents\browser\v8-render-engine\v8-render-engine\include;C:\Users\prem\Documents\browser\v8\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\prem\Documents\browser\v8\out.gn\x64.release\obj\third_party\icu;C:\Users\prem\Documents\browser\v8\out.gn\x64.release\obj\src\inspector;C:\Users\prem\Documents\browser\v8\out.gn\x64.release\obj;$(LibraryPath)</LibraryPath>
+    <SourcePath>C:\Users\prem\Documents\browser\v8-render-engine\v8-render-engine\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -154,7 +155,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\browser_basics\browsing_context.cpp" />
     <ClCompile Include="v8-render-engine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\browser_basics\browsing_context.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
