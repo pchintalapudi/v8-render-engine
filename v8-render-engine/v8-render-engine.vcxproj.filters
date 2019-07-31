@@ -10,13 +10,12 @@
     <ClCompile Include="v8-render-engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\browser_basics\browsing_context.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\browser_basics\browsing_context.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
+    <ClInclude Include="include\data_structs\bloom_filter.h" />
+    <ClInclude Include="include\data_structs\enum_set.h" />
+    <ClInclude Include="include\data_structs\enum_map.h" />
+    <ClInclude Include="include\utils\byte_sizer.h" />
+    <ClInclude Include="include\data_structs\fast_set.h" />
   </ItemGroup>
 </Project>

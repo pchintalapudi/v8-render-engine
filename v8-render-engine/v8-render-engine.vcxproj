@@ -155,11 +155,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\browser_basics\browsing_context.cpp" />
     <ClCompile Include="v8-render-engine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\browser_basics\browsing_context.h" />
+    <ClInclude Include="include\data_structs\bloom_filter.h" />
+    <ClInclude Include="include\data_structs\enum_map.h" />
+    <ClInclude Include="include\data_structs\enum_set.h" />
+    <ClInclude Include="include\data_structs\fast_set.h" />
+    <ClInclude Include="include\utils\byte_sizer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
