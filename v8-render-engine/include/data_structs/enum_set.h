@@ -2,17 +2,39 @@
 
 #include "utils/byte_sizer.h"
 namespace data_structs {
-	template<enum E>
+	template<typename E>
 	class EnumSet {
 	public:
-		EnumSet<E> add(E e) {
-			this->field |= (1 << static_cast<int>(e));
-			return this;
+
+		EnumSet() = default;
+
+		template<typename ...Pack>
+		EnumSet(Pack... p) {
+			this->add(p);
 		}
 
-		EnumSet<E> remove(E e) {
-			this->field &= ~(1 << static_cast<int>(e));
-			return this;
+		template<typename ...Pack>
+		EnumSet<E>& add(Pack... p) {
+			std::array<E, sizeof...(p)> args = { p... };
+			for (E e : args) this->field |= (1 << static_cast<integer>(e));
+			return *this;
+		}
+
+		EnumSet<E>& add(const EnumSet<E>& other) {
+			this->field |= other.field;
+			return *this;
+		}
+
+		template<typename ...Pack>
+		EnumSet<E>& remove(Pack... p) {
+			std::array<E, sizeof...(p)> args = { p... };
+			for (E e : args) this->field &= ~(1 << static_cast<integer>(e));
+			return *this;
+		}
+
+		EnumSet<E>& remove(const EnumSet<E>& other) {
+			this->field &= ~other.field;
+			return *this;
 		}
 
 		bool contains(E e) const {
@@ -40,6 +62,8 @@ namespace data_structs {
 		}
 
 	private:
-		utils::type_sizer<utils::byte_sizer(static_cast<int>(E::COUNT))>::type field;
+		//TODO: Use std::underlying_type instead of int
+		typedef int integer;
+		integer field;
 	};
 }

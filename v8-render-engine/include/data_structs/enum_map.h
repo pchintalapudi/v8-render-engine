@@ -2,7 +2,7 @@
 #include <array>
 #include "enum_set.h"
 namespace data_structs {
-	template<enum E, typename V>
+	template<typename E, typename V>
 	class enum_map_value_wrapper {
 	public:
 
@@ -27,7 +27,7 @@ namespace data_structs {
 		V& value_loc;
 	};
 
-	template<enum E, typename V>
+	template<typename E, typename V>
 	class EnumMap {
 	public:
 		enum_map_value_wrapper<E, V> operator[](E e) {
