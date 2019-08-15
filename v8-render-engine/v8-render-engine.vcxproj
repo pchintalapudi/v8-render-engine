@@ -155,35 +155,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\timing\timing.cpp" />
     <ClCompile Include="v8-render-engine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\allocators\objects.h" />
-    <ClInclude Include="include\data_structs\bloom_filter.h" />
-    <ClInclude Include="include\data_structs\data_structs.h" />
-    <ClInclude Include="include\data_structs\enum_map.h" />
+    <ClInclude Include="include\base_v8\js_maps.h" />
+    <ClInclude Include="include\base_v8\macros.h" />
+    <ClInclude Include="include\base_v8\root.h" />
     <ClInclude Include="include\data_structs\enum_set.h" />
-    <ClInclude Include="include\errors\dom_exception.h" />
-    <ClInclude Include="include\errors\dom_exception_types.h" />
-    <ClInclude Include="include\events\custom_event.h" />
     <ClInclude Include="include\events\event.h" />
-    <ClInclude Include="include\events\event_target_subclass_info_flags.h" />
     <ClInclude Include="include\events\event_target.h" />
-    <ClInclude Include="include\node_tree\collections\html_collection.h" />
-    <ClInclude Include="include\node_tree\collections\nodelist.h" />
-    <ClInclude Include="include\node_tree\collections\observable_list.h" />
-    <ClInclude Include="include\node_tree\mixins\slotable.h" />
-    <ClInclude Include="include\macros.h" />
+    <ClInclude Include="include\data_structs\bloom_filter.h" />
+    <ClInclude Include="include\nodes\collections.h" />
+    <ClInclude Include="include\nodes\document.h" />
+    <ClInclude Include="include\nodes\mixins.h" />
     <ClInclude Include="include\nodes\node.h" />
-    <ClInclude Include="include\allocators\strings.h" />
-    <ClInclude Include="include\node_tree\mixins\child_node.h" />
-    <ClInclude Include="include\node_tree\mixins\document_or_shadow_root.h" />
-    <ClInclude Include="include\node_tree\mixins\non_document_type_child_node.h" />
-    <ClInclude Include="include\node_tree\mixins\non_element_parent_node.h" />
-    <ClInclude Include="include\node_tree\mixins\parent_node.h" />
-    <ClInclude Include="include\node_tree\node.h" />
-    <ClInclude Include="include\timing\timing.h" />
-    <ClInclude Include="include\utils\byte_sizer.h" />
+    <ClInclude Include="include\nodes\observer.h" />
+    <ClInclude Include="include\nodes\shadow_root.h" />
+    <ClInclude Include="include\strings\reserved_string_allocator.h" />
+    <ClInclude Include="include\timing\high_resolution_time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

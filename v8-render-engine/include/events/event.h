@@ -2,137 +2,107 @@
 
 #include <deque>
 
-#include "v8.h"
-#include "data_structs/data_structs.h"
-#include "timing/timing.h"
-#include "macros.h"
+#include "base_v8/root.h"
+#include "base_v8/macros.h"
+
 namespace dom {
 	namespace events {
-		enum class EventPhase {
-			NONE, CAPTURING_PHASE, AT_TARGET, BUBBLING_PHASE, COUNT
-		};
 
 		enum class internal_event_flags {
-			stop_propagation, stop_immediate_propagation, canceled, in_passive_listener, composed, initialized, dispatch, bubbles, cancelable, trusted, COUNT
+			stop_propagation, stop_immediate_propagation, canceled, in_passive_listener, composed, initialized, dispatch, bubbles, cancelable, trusted
 		};
 
-		struct EventTargetInfo;
-		typedef v8::Array TouchTargetList;
+		class EventTargetContextObject;
 
-		typedef v8::Value PotentialEventTarget;
+		class EventPathData {
+		public:
 
-		struct EventTargetInfo {
-			v8::UniquePersistent<PotentialEventTarget> target;
-			v8::UniquePersistent<PotentialEventTarget> relatedTarget;
-			v8::UniquePersistent<TouchTargetList> touchTargetList;
+			EventPathData(EventTargetContextObject* invocationTarget,
+				EventTargetContextObject* relatedTarget,
+				v8::Local<v8::Array> touchTargets,
+				bool rootOfClosedTree,
+				bool slotInClosedTree);
 
-			static EventTargetInfo New(v8::UniquePersistent<PotentialEventTarget> target, v8::UniquePersistent<PotentialEventTarget> relatedTarget, v8::UniquePersistent<TouchTargetList> touchTargetList) {
-				return { std::move(target), std::move(relatedTarget), std::move(touchTargetList) };
-			}
-		};
+			EventPathData(EventPathData&& move);
 
-		struct EventPathTargetData {
-			EventTargetInfo targetInfo;
-			bool invocationTargetInShadowTree;
-			v8::UniquePersistent<PotentialEventTarget> shadowAdjustedTarget;
+			EventPathData(const EventPathData& copy) = default;
+
+			EventPathData& operator=(EventPathData&& move);
+
+			EventPathData& operator=(const EventPathData& copy) = default;
+
+			js_objects::CPP_JS_Obj_Ref<EventTargetContextObject> invocationTarget;
+			js_objects::CPP_JS_Obj_Ref<EventTargetContextObject> relatedTarget;
+			v8::Persistent<v8::Array> touchTargets;
 			bool rootOfClosedTree;
 			bool slotInClosedTree;
 
-			static EventPathTargetData New(EventTargetInfo targetInfo,
-				bool invocationTargetInShadowTree,
-				v8::UniquePersistent<PotentialEventTarget> shadowAdjustedTarget,
-				bool rootOfClosedTree,
-				bool slotInClosedTree) {
-				return { std::move(targetInfo), invocationTargetInShadowTree, std::move(shadowAdjustedTarget), rootOfClosedTree, slotInClosedTree };
-			}
-		};
-		typedef v8::String EventType;
-		typedef std::deque<EventPathTargetData> EventPath;
-		typedef data_structs::EnumSet<internal_event_flags> EventFlags;
-		typedef v8::Array ComposedPath;
-		typedef v8::Value Event;
+			~EventPathData();
 
-		class EventContextObject {
+		private:
+			bool moved;
+		};
+
+		class EventContextObject : public js_objects::BaseContextObject {
 		public:
 
-			EventContextObject(v8::Isolate* isolate, v8::Local<EventType> type, EventFlags eventFlags);
-
-			const v8::Local<EventType> typeGET(v8::Isolate* isolate) const {
+			CO_READONLY_ATTRIBUTE(type, v8::Local<v8::String>) {
 				return this->type.Get(isolate);
 			}
 
-			//Also aliases srcElement
-			const v8::Local<PotentialEventTarget> targetGET(v8::Isolate* isolate) const {
-					return this->targetInfo.target.Get(isolate);
+			CO_READONLY_ATTRIBUTE(target, EventTargetContextObject*) {
+				return target.cppCast();
 			}
 
-			v8::Local<PotentialEventTarget> currentTargetGET(v8::Isolate* isolate) const {
-				return this->path[this->idx].targetInfo.target.Get(isolate);
+			CO_READONLY_ATTRIBUTE(srcElement, EventTargetContextObject*) {
+				return this->targetGET(isolate);
 			}
 
-			Return<false>::Type<void, ComposedPath> composedPathMETHOD(v8::Isolate *isolate) const;
+			CO_READONLY_ATTRIBUTE(currentTarget, EventTargetContextObject*);
 
-			void stopPropagationMETHOD() { this->eventFlags.add(internal_event_flags::stop_propagation); }
+			CO_METHOD(composedPath, js_objects::JSThrowablePrimitive<v8::Array>);
 
-			bool cancelBubbleGET() const { return this->eventFlags.contains(internal_event_flags::stop_propagation); }
-
-			void cancelBubbleSET(bool cancel) { if (cancel) this->stopPropagationMETHOD(); }
-
-			void stopImmediatePropagationMETHOD() {
-				this->eventFlags.add(internal_event_flags::stop_immediate_propagation, internal_event_flags::stop_propagation);
+			CO_READONLY_ATTRIBUTE(eventPhase, unsigned char) {
+				return this->eventPhase;
 			}
 
-			bool bubblesGET() const {
-				return this->eventFlags.contains(internal_event_flags::bubbles);
+			CO_METHOD(stopPropagation, void);
+
+			CO_ATTRIBUTE(cancelBubble, bool);
+
+			CO_METHOD(stopImmediatePropagation, void);
+
+			CO_READONLY_ATTRIBUTE(bubbles, bool) {
+				return this->dataAttrs.contains(internal_event_flags::bubbles);
 			}
 
-			bool cancelableGET() const {
-				return this->eventFlags.contains(internal_event_flags::cancelable);
+			CO_READONLY_ATTRIBUTE(cancelable, bool) {
+				return this->dataAttrs.contains(internal_event_flags::cancelable);
 			}
 
-			bool returnValueGET() const {
-				return !this->defaultPreventedGET();
+			CO_ATTRIBUTE(returnValue, bool);
+
+			CO_METHOD(preventDefault, void);
+
+			CO_READONLY_ATTRIBUTE(isTrusted, bool) {
+				return this->dataAttrs.contains(internal_event_flags::trusted);
 			}
 
-			void returnValueSET(bool returnValue) { if (!returnValue) this->preventDefaultMETHOD(); }
-
-			void preventDefaultMETHOD() { this->eventFlags.add(internal_event_flags::canceled); }
-
-			bool defaultPreventedGET() const {
-				return this->eventFlags.contains(internal_event_flags::canceled);
+			CO_READONLY_ATTRIBUTE(timeStamp, v8::Local<v8::Number>) {
+				return v8::Number::New(isolate, this->timestamp);
 			}
 
-			bool composedGET() const {
-				return this->eventFlags.contains(internal_event_flags::composed);
-			}
-
-			bool isTrustedGET_UNFORGEABLE() const {
-				return this->eventFlags.contains(internal_event_flags::trusted);
-			}
-
-			EventPhase phaseGET() const {
-				return this->phase;
-			}
-
-			v8::Local<PotentialEventTarget> getRelatedTarget(v8::Isolate* isolate) const {
-				return this->targetInfo.relatedTarget.Get(isolate);
-			}
-
-			v8::Local<v8::Array> getTouchTargets(v8::Isolate* isolate) const {
-				return this->targetInfo.touchTargetList.Get(isolate);
-			}
-
-			EventFlags& getFlags() {
-				return this->eventFlags;
-			}
+			~EventContextObject() = default;
 
 		private:
-			v8::UniquePersistent<EventType> type;
-			EventPhase phase;
-			EventFlags eventFlags;
-			EventTargetInfo targetInfo;
-			EventPath path;
-			std::size_t idx;
+			v8::UniquePersistent<v8::String> type;
+			data_structs::EnumSet<internal_event_flags> dataAttrs;
+			js_objects::CPP_JS_Obj_Ref<EventTargetContextObject> target;
+			js_objects::CPP_JS_Obj_Ref<EventTargetContextObject> relatedTarget;
+			v8::UniquePersistent<v8::Array> touchTargetList;
+			std::deque<EventPathData> path;
+			double timestamp;
+			unsigned char eventPhase;
 		};
 	}
 }
