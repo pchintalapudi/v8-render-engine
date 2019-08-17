@@ -166,12 +166,18 @@
     <ClInclude Include="include\events\event.h" />
     <ClInclude Include="include\events\event_target.h" />
     <ClInclude Include="include\data_structs\bloom_filter.h" />
+    <ClInclude Include="include\nodes\character_data\attr.h" />
+    <ClInclude Include="include\nodes\character_data\character_data.h" />
     <ClInclude Include="include\nodes\collections.h" />
     <ClInclude Include="include\nodes\document.h" />
+    <ClInclude Include="include\nodes\elements\element.h" />
+    <ClInclude Include="include\nodes\elements\properties.h" />
     <ClInclude Include="include\nodes\mixins.h" />
     <ClInclude Include="include\nodes\node.h" />
     <ClInclude Include="include\nodes\observer.h" />
+    <ClInclude Include="include\nodes\utils\range.h" />
     <ClInclude Include="include\nodes\shadow_root.h" />
+    <ClInclude Include="include\nodes\utils\traversal.h" />
     <ClInclude Include="include\strings\reserved_string_allocator.h" />
     <ClInclude Include="include\timing\high_resolution_time.h" />
   </ItemGroup>
