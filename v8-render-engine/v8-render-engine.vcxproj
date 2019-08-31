@@ -146,6 +146,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,17 +156,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\nodes\node.cpp" />
+    <ClCompile Include="src\events\event_target.cpp" />
+    <ClCompile Include="src\events\event.cpp" />
+    <ClCompile Include="src\globals\misc_algorithms.cpp" />
+    <ClCompile Include="src\nodes\character_data\character_data.cpp" />
+    <ClCompile Include="src\nodes\elements\elements.cpp" />
+    <ClCompile Include="src\nodes\observer.cpp" />
     <ClCompile Include="src\timing\timing.cpp" />
     <ClCompile Include="v8-render-engine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\base_v8\allocator.h" />
+    <ClInclude Include="include\base_v8\bindings.h" />
     <ClInclude Include="include\base_v8\js_maps.h" />
     <ClInclude Include="include\base_v8\macros.h" />
     <ClInclude Include="include\base_v8\root.h" />
+    <ClInclude Include="include\base_v8\v8_links.h" />
     <ClInclude Include="include\data_structs\enum_set.h" />
     <ClInclude Include="include\events\event.h" />
     <ClInclude Include="include\events\event_target.h" />
     <ClInclude Include="include\data_structs\bloom_filter.h" />
+    <ClInclude Include="include\exceptions\dom_exception.h" />
+    <ClInclude Include="include\globals\global_access.h" />
+    <ClInclude Include="include\globals\misc_algorithms.h" />
     <ClInclude Include="include\nodes\character_data\attr.h" />
     <ClInclude Include="include\nodes\character_data\character_data.h" />
     <ClInclude Include="include\nodes\collections.h" />

@@ -13,6 +13,27 @@
     <ClCompile Include="src\timing\timing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\events\event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\events\event_target.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\globals\misc_algorithms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\elements\elements.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\character_data\character_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\observer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nodes\node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\base_v8\root.h" />
@@ -36,5 +57,11 @@
     <ClInclude Include="include\nodes\character_data\attr.h" />
     <ClInclude Include="include\nodes\utils\range.h" />
     <ClInclude Include="include\nodes\utils\traversal.h" />
+    <ClInclude Include="include\base_v8\allocator.h" />
+    <ClInclude Include="include\exceptions\dom_exception.h" />
+    <ClInclude Include="include\globals\global_access.h" />
+    <ClInclude Include="include\globals\misc_algorithms.h" />
+    <ClInclude Include="include\base_v8\bindings.h" />
+    <ClInclude Include="include\base_v8\v8_links.h" />
   </ItemGroup>
 </Project>

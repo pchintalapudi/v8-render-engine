@@ -48,21 +48,27 @@ namespace dom {
 		};
 
 		enum class MutationObserverOptions {
-			childList, attributes, characterData, subtree, attributeOldValue, characterDataOldValue
+			childList, attributes, characterData, subtree, attributeOldValue, characterDataOldValue, __COUNT__
 		};
 
 		class MutationObserverContextObject : public js_objects::BaseContextObject {
 		public:
-			CO_METHOD(observe, void, nodes::NodeContextObject* nodes, data_structs::EnumSet<MutationObserverOptions> options, std::deque<std::string> attributeFilter);
+			CO_METHOD(observe, void, nodes::NodeContextObject& node, data_structs::EnumSet<MutationObserverOptions> options, std::deque<std::string> attributeFilter);
 
 			CO_METHOD(disconnect, void);
 
 			CO_METHOD(takeRecords, v8::Local<v8::Array>);
 		private:
-			std::deque<MutationRecordContextObject*> records;
-			v8::Persistent<v8::Function> callback;
-			//Intentionally weak by standards
-			v8::Persistent<v8::Object> weakNodeRef;
+			v8::UniquePersistent<v8::Function> callback;
+			std::deque<js_objects::Weak_JS_CPP_Property<nodes::NodeContextObject>> weakNodeList;
+			std::deque<js_objects::JS_CPP_Property<MutationRecordContextObject>> recordQueue;
+		};
+
+		class TransientMutationObserverContextObject : public MutationObserverContextObject {
+		private:
+			friend class dom::observer::MutationObserverContextObject;
+
+			js_objects::JS_CPP_Property<MutationObserverContextObject> source;
 		};
 	}
 }

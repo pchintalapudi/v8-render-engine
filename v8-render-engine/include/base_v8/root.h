@@ -1,32 +1,98 @@
 #pragma once
+
+#include <map>
+#include <optional>
+#include <set>
+
+#include "bindings.h"
 #include "v8.h"
 #include "js_maps.h"
 #include "data_structs/enum_set.h"
 
+namespace dom {
+	namespace window {
+		class WindowContextObject;
+	}
+}
+
 namespace js_objects {
+
+	template<typename T>
+	struct JS_CPP_Property;
+
+	class BaseContextObject;
+
+	struct BrowsingContextProperties {
+		std::set<BaseContextObject*> natives;
+		std::map<const char*, v8::UniquePersistent<v8::Value>> v8PropertyCache;
+		dom::window::WindowContextObject* window;
+		bool onBeforeUnload;
+		bool cleaned;
+
+		operator bool() {
+			return !this->cleaned;
+		}
+
+		thread_local static std::map<v8::UniquePersistent<v8::Context>, BrowsingContextProperties> contexts;
+
+		static v8::Local<v8::Context> initRenderingProcess(v8::Isolate* isolate);
+
+		static bool preDestroyRenderingProcess(v8::Local<v8::Context> context);
+
+		static void destroyRenderingProcess(v8::Local<v8::Context> context);
+	};
+
 	//Reimplementation of NodeJS's ObjectWrap
 	class BaseContextObject {
 	public:
-		BaseContextObject(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> templ, data_structs::EnumSet<ObjectType> types) : types(types) {
-			v8::MaybeLocal<v8::Object> obj = templ->NewInstance(isolate->GetCurrentContext());
-			if (!obj.IsEmpty()) {
-				auto local = obj.ToLocalChecked();
-				ref = v8::Persistent<v8::Object>(isolate, local);
-				local->SetAlignedPointerInInternalField(0, this);
-				this->weaken();
+
+		//Remains valid until enclosing handle scope is destroyed or new reference is made
+		template<ObjectType type>
+		BaseContextObject(v8::Local<v8::Context> context, bool& error) : types(ObjectTemplateInstantiator<type>::types()) {
+			v8::Local<v8::ObjectTemplate> templ = ObjectTemplateInstantiator<type>::getTemplate(context);
+			auto instanceMaybe = templ->NewInstance(context);
+			if (instanceMaybe.IsEmpty()) {
+				error = true;
+				return;
 			}
+			auto instance = instanceMaybe.ToLocalChecked();
+			instance->SetAlignedPointerInInternalField(0, this);
+			this->ref = v8::Persistent<v8::Object>(context->GetIsolate(), instance);
+			this->ref.SetWeak(this, BaseContextObject::del, v8::WeakCallbackType::kParameter);
 		}
 
-		static BaseContextObject* access(v8::Local<v8::Object> obj) {
+		static BaseContextObject* uncheckedAccess(v8::Local<v8::Object> obj) {
 			return static_cast<BaseContextObject*>(obj->GetAlignedPointerFromInternalField(0));
 		}
 
-		template<bool checked = true>
-		v8::MaybeLocal<v8::Object> getRefFromThis(v8::Isolate* isolate) {
-			return checked ? v8::MaybeLocal<v8::Object>(this->getRefFromThis<false>(isolate)) : this->ref.Get(isolate);
+		template<ObjectType type>
+		static std::optional<Pin<typename ObjectTemplateInstantiator<type>::type>> checkedAccess(v8::Local<v8::Object> obj) {
+			if (obj->InternalFieldCount()) {
+				auto ptr = BaseContextObject::uncheckedAccess(obj);
+				if (ptr) {
+					if (ptr->typeof(type)) {
+						return std::make_optional(Pin(obj, static_cast<typename ObjectTemplateInstantiator<type>::type*>(ptr)));
+					}
+				}
+			}
+			return {};
 		}
 
-		bool typeof(ObjectType type) { return this->types.contains(type); }
+		template<typename ...Pack>
+		bool typeof(Pack... type) const { return this->types.any(type...); }
+
+		v8::Local<v8::Object> toLocal(v8::Isolate* isolate) const {
+			return this->ref.Get(isolate);
+		}
+
+		template<typename Type>
+		js_objects::Pin<Type> pin(v8::Isolate* isolate) {
+			return js_objects::Pin<Type>(this->toLocal(isolate), *static_cast<Type*>(this));
+		}
+
+		auto& getWeak() const {
+			return this->ref;
+		}
 
 		virtual ~BaseContextObject() {
 			this->ref.ClearWeak();
@@ -36,6 +102,7 @@ namespace js_objects {
 	private:
 
 		static void del(const v8::WeakCallbackInfo<BaseContextObject>& data) {
+
 			delete data.GetParameter();
 		}
 
@@ -45,71 +112,5 @@ namespace js_objects {
 
 		v8::Persistent<v8::Object> ref;
 		data_structs::EnumSet<ObjectType> types;
-		std::size_t cppRefs;
-	};
-
-	template<typename CO>
-	struct JSThrowableReturn {
-		CO* returnValue;
-		bool thrown;
-	};
-
-	template<typename CO>
-	static JSThrowableReturn<CO> errorThrown() {
-		return { nullptr, true };
-	}
-
-	template<typename V8>
-	struct JSThrowablePrimitive {
-		v8::Local<V8> primitive;
-		bool thrown;
-	};
-
-	template<typename CPP_Primitive>
-	struct CPPThrowablePrimitive {
-		CPP_Primitive primitive;
-		bool thrown;
-	};
-
-	template<typename ContextObject>
-	class CPP_JS_Obj_Ref {
-	public:
-
-		CPP_JS_Obj_Ref() = default;
-
-		CPP_JS_Obj_Ref(ContextObject* ref, v8::Isolate* isolate) : co(ref), obj(ref->getRefFromThisUnchecked(isolate)) {}
-
-		ContextObject* cppCast() {
-			return this->co;
-		}
-
-		v8::Local<v8::Object> handle(v8::Isolate* isolate) {
-			return this->obj.Get(isolate);
-		}
-
-	private:
-		ContextObject* co;
-		v8::UniquePersistent<v8::Object> obj;
-	};
-
-	template<typename ContextObject>
-	class Weak_CPP_JS_Obj_Ref {
-	public:
-
-		CPP_JS_Obj_Ref() = default;
-
-		CPP_JS_Obj_Ref(ContextObject* ref, v8::Isolate* isolate) : co(ref), obj(ref->getRefFromThisUnchecked(isolate)) {}
-
-		ContextObject* cppCastUnchecked() {
-			return this->co;
-		}
-
-		v8::MaybeLocal<v8::Object> handle(v8::Isolate* isolate) {
-			return v8::MaybeLocal<v8::Object>(this->obj.Get(isolate));
-		}
-
-	private:
-		ContextObject* co;
-		v8::Persistent<v8::Object> weakRef;
 	};
 }

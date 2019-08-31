@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.h"
+#include "mixins.h"
 
 namespace dom {
 
@@ -21,6 +22,9 @@ namespace dom {
 
 		class DocumentTypeContextObject : public NodeContextObject {
 		public:
+
+			MIXIN_CHILD_NODE
+
 			CO_READONLY_ATTRIBUTE(name, v8::Local<v8::String>);
 			CO_READONLY_ATTRIBUTE(publicId, v8::Local<v8::String>);
 			CO_READONLY_ATTRIBUTE(systemId, v8::Local<v8::String>);
@@ -28,6 +32,7 @@ namespace dom {
 
 		class DOMImplementationContextObject : public js_objects::BaseContextObject {
 		public:
+
 			CO_METHOD(createDocumentType, DocumentTypeContextObject&, v8::Local<v8::String> qualifiedName, v8::Local<v8::String> publicId, v8::Local<v8::String> systemId);
 			CO_METHOD(createDocument, XMLDocumentContextObject&, v8::Local<v8::String> ns, v8::Local<v8::String> qualifiedName, DocumentTypeContextObject* doctype);
 			CO_METHOD(createHTMLDocument, DocumentContextObject&, v8::Local<v8::String> title);
@@ -38,10 +43,18 @@ namespace dom {
 		};
 
 		class DocumentFragmentContextObject : public NodeContextObject {
+			MIXIN_NON_ELEMENT_PARENT_NODE
+
+				MIXIN_PARENT_NODE
 		};
 
 		class DocumentContextObject : public NodeContextObject {
 		public:
+
+			MIXIN_NON_ELEMENT_PARENT_NODE
+
+				MIXIN_PARENT_NODE
+
 			CO_READONLY_ATTRIBUTE(implementation, DOMImplementationContextObject&);
 
 			CO_READONLY_ATTRIBUTE(URL, v8::Local<v8::String>);
@@ -55,11 +68,11 @@ namespace dom {
 			CO_READONLY_ATTRIBUTE(characterSet, v8::Local<v8::String>);
 
 			CO_READONLY_ATTRIBUTE(charset, v8::Local<v8::String>) {
-				return this->characterSetGET(isolate);
+				return this->characterSetGET(context);
 			}
 
 			CO_READONLY_ATTRIBUTE(inputEncoding, v8::Local<v8::String>) {
-				return this->characterSetGET(isolate);
+				return this->characterSetGET(context);
 			}
 
 			CO_READONLY_ATTRIBUTE(contentType, v8::Local<v8::String>);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nodes/node.h"
+#include "nodes/mixins.h"
 
 namespace dom {
 
@@ -11,12 +12,28 @@ namespace dom {
 
 	namespace nodes {
 
+		namespace elements {
+			namespace html {
+				class HTMLSlotElementContextObject;
+			}
+		}
+
 		class AttrContextObject;
 		class OpenShadowRoot;
 		class ClosedShadowRoot;
 
 		class ElementContextObject : public NodeContextObject {
-			CO_READONLY_ATTRIBUTE(namespaceURI, v8::Local<v8::String>);
+		public:
+
+			MIXIN_PARENT_NODE
+
+				MIXIN_NON_DOCUMENT_TYPE_CHILD_NODE
+
+				MIXIN_CHILD_NODE
+
+				MIXIN_SLOTABLE
+
+				CO_READONLY_ATTRIBUTE(namespaceURI, v8::Local<v8::String>);
 
 			CO_READONLY_ATTRIBUTE(prefix, v8::Local<v8::String>);
 
@@ -87,7 +104,7 @@ namespace dom {
 			CO_METHOD(matches, bool, v8::Local<v8::String> selectors);
 
 			CO_METHOD(webkitMatchesSelector, bool, v8::Local<v8::String> selectors) {
-				return this->matchesMETHOD(isolate, selectors);
+				return this->matchesMETHOD(context, selectors);
 			}
 
 			CO_METHOD(getElementsByTagName, collections::ComputedHTMLCollectionContextObject&, v8::Local<v8::String> qualifiedName);
@@ -101,6 +118,8 @@ namespace dom {
 
 			//CEReactions
 			CO_METHOD(insertAdjacentText, void, v8::Local<v8::String> whre, v8::Local<v8::String> data);
+		private:
+			js_objects::JS_CPP_Property<elements::html::HTMLSlotElementContextObject> assignedSlot;
 		};
 	}
 }
