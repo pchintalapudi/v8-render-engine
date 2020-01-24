@@ -96,7 +96,7 @@ namespace cpp {
 						//TODO throw exception
 						return {};
 					}
-					return { mutation_algorithms::clone(self, pins::NullPin<DocumentContextObject>::null(context->GetIsolate()), deep) };
+					return { algorithms::clone(self, pins::NullPin<DocumentContextObject>::null(context->GetIsolate()), deep) };
 				}
 				CO_METHOD(isEqualNode, bool, pins::NullPin<NodeContextObject> otherNode);
 				CO_METHOD(isSameNode, bool, pins::NullPin<NodeContextObject> otherNode) {
@@ -118,16 +118,16 @@ namespace cpp {
 				CO_METHOD(isDefaultNamespace, v8::Local<v8::Boolean>, v8::Local<v8::Value> ns);
 
 				CO_METHOD(insertBefore, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> self, pins::Pin<NodeContextObject> node, pins::NullPin<NodeContextObject> child) {
-					return mutation_algorithms::preInsert(context, node, self, child);
+					return algorithms::preInsert(context, node, self, child);
 				}
 				CO_METHOD(appendChild, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> self, pins::Pin<NodeContextObject> node) {
-					return mutation_algorithms::preInsert(context, node, self, pins::NullPin<NodeContextObject>::null(context->GetIsolate()));
+					return algorithms::preInsert(context, node, self, pins::NullPin<NodeContextObject>::null(context->GetIsolate()));
 				}
 				CO_METHOD(replaceChild, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> self, pins::Pin<NodeContextObject> node, pins::Pin<NodeContextObject> child) {
-					return mutation_algorithms::replace(context, node, self, child);
+					return algorithms::replace(context, node, self, child);
 				}
 				CO_METHOD(removeChild, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> self, pins::Pin<NodeContextObject> node) {
-					return mutation_algorithms::preRemove(context, node, self);
+					return algorithms::preRemove(context, node, self);
 				}
 
 				//TODO

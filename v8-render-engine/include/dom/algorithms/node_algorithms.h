@@ -9,9 +9,11 @@ namespace cpp {
 		namespace nodes {
 			class NodeContextObject;
 			class DocumentContextObject;
+			class ElementContextObject;
+			class AttrContextObject;
 		}
 
-		namespace mutation_algorithms {
+		namespace algorithms {
 
 #define BASIC_ARGS v8::Local<v8::Context> context, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> node, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> parent
 #define CHILD_ARGS BASIC_ARGS, cpp::pins::NullPin<cpp::dom::nodes::NodeContextObject> child
@@ -34,6 +36,12 @@ namespace cpp {
 			void adopt(v8::Local<v8::Context> context, pins::Pin<nodes::NodeContextObject> node, pins::Pin<nodes::DocumentContextObject> document);
 
 			pins::Pin<nodes::NodeContextObject> clone(pins::Pin<nodes::NodeContextObject> node, pins::NullPin<nodes::DocumentContextObject> document, bool cloneChildren);
+
+			void handleAttributeChanges(pins::Pin<nodes::AttrContextObject> attribute, pins::Pin<nodes::ElementContextObject> element, v8::Local<v8::String> oldValue, v8::Local<v8::String> newValue) {
+				//TODO queue mutation record
+				//TODO queue custom element callback
+				//TODO attribute change steps
+			}
 		}
 	}
 }

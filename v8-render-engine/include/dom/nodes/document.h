@@ -21,8 +21,12 @@ namespace cpp {
 				v8::UniquePersistent<v8::String> systemId;
 			};
 			class DocumentFragmentContextObject : public NodeContextObject {
+			public:
 				MIXIN_NON_ELEMENT_PARENT_NODE;
 				MIXIN_PARENT_NODE;
+			protected:
+				pins::NullProperty<ElementContextObject> host;
+				friend class DocumentContextObject;
 			};
 			class TextContextObject;
 			class CDATASectionContextObject;
@@ -36,9 +40,13 @@ namespace cpp {
 			class DocumentContextObject : public NodeContextObject {
 			public:
 				CO_PIN_GETTER(implementation);
-				CO_READONLY_ATTRIBUTE(url, v8::Local<v8::String>);
-				CO_READONLY_ATTRIBUTE(documentURI, v8::Local<v8::String>);
-				CO_READONLY_ATTRIBUTE(compatMode, v8::Local<v8::String>);
+				CO_READONLY_ATTRIBUTE(documentURI, v8::Local<v8::String>) {
+					return this->url.pin(context->GetIsolate())->serialize(context);
+				}
+				CO_ALIAS_GETTER(URL, documentURI);
+				CO_READONLY_ATTRIBUTE(compatMode, v8::Local<v8::String>) {
+					return v8::String::NewFromUtf8(context->GetIsolate(), this->mode == Mode::QUIRKS ? "BackCompat" : "CSS1Compat").ToLocalChecked();
+				}
 				CO_READONLY_ATTRIBUTE(characterSet, v8::Local<v8::String>) {
 					return this->encoding.Get(context->GetIsolate());
 				}
@@ -46,37 +54,70 @@ namespace cpp {
 				CO_ALIAS_GETTER(inputEncoding, characterSet);
 				CO_TRANSPARENT_GETTER(contentType);
 
+				//TODO
 				CO_READONLY_ATTRIBUTE(doctype, pins::NullPin<DocumentTypeContextObject>);
+				//TODO
 				CO_READONLY_ATTRIBUTE(documentElement, pins::NullPin<ElementContextObject>);
 
+				//TODO
 				CO_METHOD(getElementsByTagName, pins::Pin<HTMLCollectionContextObject>, v8::Local<v8::String> qualifiedName);
+				//TODO
 				CO_METHOD(getElementsByTagNameNS, pins::Pin<HTMLCollectionContextObject>, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
+				//TODO
 				CO_METHOD(getElementsByClassName, pins::Pin<HTMLCollectionContextObject>, v8::Local<v8::String> className);
 
+				//TODO
 				CO_METHOD(createElement, pins::Pin<ElementContextObject>, v8::Local<v8::String> localName, v8::Local<v8::String> options);
+				//TODO
 				CO_METHOD(createElementNS, pins::Pin<ElementContextObject>, v8::Local<v8::Value> ns, v8::Local<v8::String> qualifiedName, v8::Local<v8::String> options);
+				//TODO
 				CO_METHOD(createDocumentFragment, pins::Pin<DocumentFragmentContextObject>);
+				//TODO
 				CO_METHOD(createTextNode, pins::Pin<TextContextObject>, v8::Local<v8::String> data);
+				//TODO
 				CO_METHOD(createCDATASection, pins::Pin<CDATASectionContextObject>, v8::Local<v8::String> data);
+				//TODO
 				CO_METHOD(createComment, pins::Pin<CommentContextObject>, v8::Local<v8::String> data);
+				//TODO
 				CO_METHOD(createProcessingInstruction, pins::Pin<ProcessingInstructionContextObject>, v8::Local<v8::String> target, v8::Local<v8::String> data);
 
-				CO_METHOD(importNode, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> node, bool deep) {
-					//TODO
+				CO_METHOD(importNode, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<DocumentContextObject> self, pins::Pin<NodeContextObject> node, bool deep) {
+					if (node->type() == 9 || node->domTypeof(DOMType::ShadowRoot)) {
+						//TODO throw error
+						return {};
+					}
+					return algorithms::clone(node, self, deep);
 				}
 				CO_METHOD(adoptNode, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<DocumentContextObject> self, pins::Pin<NodeContextObject> node) {
 					//TODO exceptions
-					mutation_algorithms::adopt(context, node, self);
+					if (node->type() == 9) {
+						//TODO throw error
+						return {};
+					}
+					if (node->domTypeof(DOMType::ShadowRoot)) {
+						//TODO throw error
+						return {};
+					}
+					if (node->type() == 11 && node.downcast<DocumentFragmentContextObject>()->host.pin(context->GetIsolate())) {
+						return {};
+					}
+					algorithms::adopt(context, node, self);
 					return { node };
 				}
 
+				//TODO
 				CO_METHOD(createAttribute, pins::Pin<AttrContextObject>, v8::Local<v8::String> localName);
+				//TODO
 				CO_METHOD(createAttributeNS, pins::Pin<AttrContextObject>, v8::Local<v8::Value> ns, v8::Local<v8::String> qualifiedName);
 
+				//TODO
 				CO_METHOD(createEvent, pins::Pin<EventContextObject>, v8::Local<v8::String> iface);
+				//TODO
 				CO_METHOD(createRange, pins::Pin<RangeContextObject>);
 
+				//TODO
 				CO_METHOD(createNodeInterator, pins::Pin<NodeIteratorContextObject>, pins::Pin<NodeContextObject> root, std::size_t whatToShow, v8::Local<v8::Value> nodeFilter);
+				//TODO
 				CO_METHOD(createTreeWalker, pins::Pin<TreeWalkerContextObject>, pins::Pin<NodeContextObject> root, std::size_t whatToShow, v8::Local<v8::Value> nodeFilter);
 
 				MIXIN_XPATH_EVALUATOR_BASE;
@@ -84,14 +125,21 @@ namespace cpp {
 				MIXIN_DOCUMENT_OR_SHADOW_ROOT;
 				MIXIN_PARENT_NODE;
 
-				virtual pins::NullPin<EventTargetContextObject> getTheParent(v8::Local<v8::Context> context, pins::Pin<EventContextObject> event);
+				virtual pins::NullPin<EventTargetContextObject> getTheParent(v8::Local<v8::Context> context, pins::Pin<EventContextObject> event) {
+
+				}
+
+				enum class Mode {
+					NO_QUIRKS, LIMITED_QUIRKS, QUIRKS
+				};
+
 			private:
 				v8::UniquePersistent<v8::String> encoding;
 				v8::UniquePersistent<v8::String> contentType;
 				pins::Property<url::URLContextObject> url;
 				//TODO origin
 				v8::UniquePersistent<v8::String> type;
-				v8::UniquePersistent<v8::String> mode;
+				Mode mode;
 				pins::Property<DOMImplementationContextObject> implementation;
 			};
 

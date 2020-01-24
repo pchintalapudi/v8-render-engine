@@ -156,11 +156,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\dom\nodes\element.cpp" />
     <ClCompile Include="src\dom\algorithms\node_algorithms.cpp" />
     <ClCompile Include="src\dom\events\event.cpp" />
     <ClCompile Include="src\dom\events\event_target.cpp" />
     <ClCompile Include="src\dom\mutations\mutation_observer.cpp" />
     <ClCompile Include="src\dom\nodes\node.cpp" />
+    <ClCompile Include="src\dom\nodes\text.cpp" />
+    <ClCompile Include="src\dom\traversal\traverser.cpp" />
     <ClCompile Include="v8-render-engine.cpp" />
   </ItemGroup>
   <ItemGroup>

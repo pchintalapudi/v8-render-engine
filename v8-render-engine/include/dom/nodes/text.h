@@ -7,6 +7,7 @@ namespace cpp {
 		namespace nodes {
 			class TextContextObject : public CharacterDataContextObject {
 			public:
+				//TODO
 				CO_METHOD(splitText, pins::Pin<TextContextObject>, unsigned long offset);
 
 				CO_READONLY_ATTRIBUTE(wholeText, v8::Local<v8::String>);

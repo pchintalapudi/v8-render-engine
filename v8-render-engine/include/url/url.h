@@ -7,6 +7,10 @@
 namespace cpp {
 	namespace url {
 		class URLContextObject : public dom::DOMContextObject {
+		public:
+			v8::Local<v8::String> serialize(v8::Local<v8::Context> context) {
+				return this->serialized.Get(context->GetIsolate());
+			}
 		private:
 			v8::UniquePersistent<v8::String> scheme;
 			enum class SchemeType {
@@ -26,6 +30,7 @@ namespace cpp {
 			v8::UniquePersistent<v8::String> fragment;
 			bool cannotBeABaseFlag;
 			//TODO blobURLEntry
+			v8::UniquePersistent<v8::String> serialized;
 		};
 	}
 }

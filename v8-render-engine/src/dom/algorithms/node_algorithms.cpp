@@ -4,13 +4,13 @@
 #include "dom/nodes/element.h"
 #include "dom/nodes/attr.h"
 
-using namespace cpp::dom::mutation_algorithms;
+using namespace cpp::dom::algorithms;
 
-bool cpp::dom::mutation_algorithms::ensurePreInsertionValidity(CHILD_ARGS) {
+bool cpp::dom::algorithms::ensurePreInsertionValidity(CHILD_ARGS) {
 	return true;//TODO exceptions
 }
 
-std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::mutation_algorithms::preInsert(CHILD_ARGS)
+std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::algorithms::preInsert(CHILD_ARGS)
 {
 	if (!ensurePreInsertionValidity(context, node, parent, child)) {
 		return {};
@@ -23,7 +23,7 @@ std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::muta
 	return { node };
 }
 
-void cpp::dom::mutation_algorithms::insert(CHILD_ARGS, bool suppressObservers) {
+void cpp::dom::algorithms::insert(CHILD_ARGS, bool suppressObservers) {
 	std::vector<pins::Pin<nodes::NodeContextObject>> nodes;
 	if (node->domTypeof(DOMType::DocumentFragment)) {
 		nodes.reserve(node->childNodes_GET(context)->size());
@@ -92,7 +92,7 @@ bool ensurePreReplaceValidity(CHILD_ARGS) {
 	return true;//TODO exceptions
 }
 
-std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::mutation_algorithms::replace(KNOWN_CHILD_ARGS) {
+std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::algorithms::replace(KNOWN_CHILD_ARGS) {
 	if (!ensurePreReplaceValidity(context, node, parent, child)) {
 		return {};
 	}
@@ -112,7 +112,7 @@ std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::muta
 	return { child };
 }
 
-void cpp::dom::mutation_algorithms::replaceAll(v8::Local<v8::Context> context, cpp::pins::NullPin<cpp::dom::nodes::NodeContextObject> node, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> parent) {
+void cpp::dom::algorithms::replaceAll(v8::Local<v8::Context> context, cpp::pins::NullPin<cpp::dom::nodes::NodeContextObject> node, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> parent) {
 	auto r_Nodes = parent->childNodes_GET(context);
 	//TODO set addedNodes
 	std::vector<pins::Pin<nodes::NodeContextObject>> removedNodes = {};
@@ -130,7 +130,7 @@ void cpp::dom::mutation_algorithms::replaceAll(v8::Local<v8::Context> context, c
 	//TODO queue tree mutation record
 }
 
-std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::mutation_algorithms::preRemove(v8::Local<v8::Context> context, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> child, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> parent) {
+std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::algorithms::preRemove(v8::Local<v8::Context> context, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> child, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> parent) {
 	if (child->parent_GET(context) != parent) {
 		//TODO exception
 		return {};
@@ -139,7 +139,7 @@ std::optional<cpp::pins::Pin<cpp::dom::nodes::NodeContextObject>> cpp::dom::muta
 	return { child };
 }
 
-void cpp::dom::mutation_algorithms::remove(v8::Local<v8::Context> context, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> node, bool suppressObserversFlag, bool doErasure) {
+void cpp::dom::algorithms::remove(v8::Local<v8::Context> context, cpp::pins::Pin<cpp::dom::nodes::NodeContextObject> node, bool suppressObserversFlag, bool doErasure) {
 	auto parent = node->parent_GET(context);
 	if (parent) {
 		auto& children = parent.pin()->childNodes_GET(context)->vec();
@@ -192,7 +192,7 @@ void cpp::dom::mutation_algorithms::remove(v8::Local<v8::Context> context, cpp::
 	}
 }
 
-void cpp::dom::mutation_algorithms::adopt(v8::Local<v8::Context> context, cpp::pins::Pin<nodes::NodeContextObject> node, pins::Pin<nodes::DocumentContextObject> document) {
+void cpp::dom::algorithms::adopt(v8::Local<v8::Context> context, cpp::pins::Pin<nodes::NodeContextObject> node, pins::Pin<nodes::DocumentContextObject> document) {
 	auto oldDocument = node->ownerDocument_GET(context);
 	auto parent = node->parent_GET(context);
 	if (parent) {

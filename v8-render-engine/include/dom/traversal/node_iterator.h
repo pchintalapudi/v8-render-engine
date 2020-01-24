@@ -12,8 +12,15 @@ namespace cpp {
 			CO_PRIMITIVE_GETTER(whatToShow, v8::Integer);
 			CO_TRANSPARENT_GETTER(filter);
 
-			CO_METHOD(nextNode, pins::NullPin<nodes::NodeContextObject>);
-			CO_METHOD(previousNode, pins::NullPin<nodes::NodeContextObject>);
+			CO_METHOD(nextNode, pins::NullPin<nodes::NodeContextObject>) {
+				return this->traverse(context, true);
+			}
+			CO_METHOD(previousNode, pins::NullPin<nodes::NodeContextObject>) {
+				return this->traverse(context, false);
+			}
+
+			//TODO
+			pins::NullPin<nodes::NodeContextObject> traverse(v8::Local<v8::Context> context, bool forwards);
 
 			CO_METHOD(detach, void) {}
 		private:

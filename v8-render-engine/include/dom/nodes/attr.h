@@ -22,6 +22,7 @@ namespace cpp {
 				}
 
 				CO_TRANSPARENT_GETTER(value);
+				//TODO
 				CO_WRITEONLY_ATTRIBUTE(value, v8::Local<v8::String>);
 
 				CO_PIN_GETTER(ownerElement);

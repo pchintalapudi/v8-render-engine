@@ -19,49 +19,76 @@ namespace cpp {
 				CO_READONLY_ATTRIBUTE(tagName, auto) {
 					return this->htmlUppercasedQualifiedName.Get(context->GetIsolate());
 				}
-
+				
+				//TODO
 				CO_ATTRIBUTE(id, v8::Local<v8::String>);
+				//TODO
 				CO_ATTRIBUTE(className, v8::Local<v8::String>);
 				CO_PIN_GETTER(classList);
 
+				//TODO
 				CO_ATTRIBUTE(slot, v8::Local<v8::String>);
 
+				//TODO
 				CO_METHOD(hasAttributes, v8::Local<v8::Boolean>);
 				CO_PIN_GETTER(attributes);
+				//TODO
 				CO_METHOD(getAttributeNames, v8::Local<v8::Array>);
+				//TODO
 				CO_METHOD(getAttribute, v8::Local<v8::Value>, v8::Local<v8::String> qualifiedName);
+				//TODO
 				CO_METHOD(getAttributeNS, v8::Local<v8::Value>, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
+				//TODO
 				CO_METHOD(setAttribute, void, v8::Local<v8::String> qualifiedName, v8::Local<v8::String> value);
+				//TODO
 				CO_METHOD(setAttributeNS, void, v8::Local<v8::Value> ns, v8::Local<v8::String> localName, v8::Local<v8::String> value);
+				//TODO
 				CO_METHOD(removeAttribute, void, v8::Local<v8::String> qualifiedName);
+				//TODO
 				CO_METHOD(removeAttributeNS, void, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
+				//TODO
 				CO_METHOD(toggleAttribute, v8::Local<v8::Boolean>, v8::Local<v8::String> qualifiedName, bool force);
+				//TODO
 				CO_METHOD(hasAttribute, bool, v8::Local<v8::String> qualifiedName);
+				//TODO
 				CO_METHOD(hasAttributeNS, bool, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
 
+				//TODO
 				CO_METHOD(getAttributeNode, pins::NullPin<AttrContextObject>, v8::Local<v8::String> qualifiedName);
+				//TODO
 				CO_METHOD(getAttributeNodeNS, pins::NullPin<AttrContextObject>, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
+				//TODO
 				CO_METHOD(setAttributeNode, pins::NullPin<AttrContextObject>, pins::Pin<AttrContextObject>);
+				//TODO
 				CO_METHOD(setAttributeNodeNS, pins::NullPin<AttrContextObject>, pins::Pin<AttrContextObject>);
+				//TODO
 				CO_METHOD(removeAttributeNodeNS, pins::Pin<AttrContextObject>, pins::Pin<AttrContextObject>);
 
-				CO_METHOD(attachShadow, pins::Pin<ShadowRootContextObject>, v8::Local<v8::String> mode, bool delegatesFocus);
+				//TODO
+				CO_METHOD(attachShadow, pins::Pin<ShadowRootContextObject>, bool mode, bool delegatesFocus);
 				CO_READONLY_ATTRIBUTE(shadowRoot, auto) {
 					auto pin = this->shadowRoot.pin(context->GetIsolate());
 					return pin && !pin.pin()->isClosed() ? pin : pins::NullPin<ShadowRootContextObject>::null(context->GetIsolate());
 				}
 
+				//TODO
 				CO_METHOD(closest, pins::NullPin<ElementContextObject>, v8::Local<v8::String> selectors);
+				//TODO
 				CO_METHOD(matches, v8::Local<v8::Boolean>, v8::Local<v8::String> selectors);
 				CO_METHOD(webkitMatchesSelector, v8::Local<v8::Boolean>, v8::Local<v8::String> selectors) {
 					return this->matches_METHOD(context, selectors);
 				}
 
+				//TODO
 				CO_METHOD(getElementsByTagName, pins::Pin<HTMLCollectionContextObject>, v8::Local<v8::String> qualifiedName);
+				//TODO
 				CO_METHOD(getElementsByTagNameNS, pins::Pin<HTMLCollectionContextObject>, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
+				//TODO
 				CO_METHOD(getElementsByClassName, pins::Pin<HTMLCollectionContextObject>, v8::Local<v8::String> className);
 
+				//TODO
 				CO_METHOD(insertAdjacentElement, std::optional<pins::NullPin<ElementContextObject>>, v8::Local<v8::String> whre, pins::Pin<ElementContextObject> element);
+				//TODO
 				CO_METHOD(insertAdjacentText, std::optional<pins::NullPin<TextContextObject>>, v8::Local<v8::String> whre, v8::Local<v8::String> data);
 
 				MIXIN_PARENT_NODE;
@@ -70,11 +97,15 @@ namespace cpp {
 				MIXIN_SLOTABLE;
 
 				auto getShadow(v8::Local<v8::Context> context) { return this->shadowRoot.pin(context->GetIsolate()); }
+
+				enum class CustomElementState {
+					UNDEFINED, FAILED, UNCUSTOMIZED, CUSTOMIZED
+				};
 			private:
 				v8::UniquePersistent<v8::String> ns;
 				v8::UniquePersistent<v8::String> nsPrefix;
 				v8::UniquePersistent<v8::String> localName;
-				v8::UniquePersistent<v8::String> customElementState;
+				CustomElementState customElementState;
 				v8::UniquePersistent<v8::String> customElementDefinition;
 				v8::UniquePersistent<v8::String> is;
 				v8::UniquePersistent<v8::String> htmlUppercasedQualifiedName;
