@@ -16,13 +16,14 @@ namespace cpp {
 			class DocumentContextObject;
 			class ElementContextObject;
 
+
 			class NodeContextObject : public EventTargetContextObject {
 			public:
 
 				CO_STATIC_UINT32_ATTRIBUTE(ELEMENT_NODE, 1);
 				CO_STATIC_UINT32_ATTRIBUTE(ATTRIBUTE_NODE, 2);
 				CO_STATIC_UINT32_ATTRIBUTE(TEXT_NODE, 3);
-				CO_STATIC_UINT32_ATTRIBUTE(CDATA_NODE, 4);
+				CO_STATIC_UINT32_ATTRIBUTE(CDATA_SECTION_NODE, 4);
 				CO_STATIC_UINT32_ATTRIBUTE(ENTITY_REFERENCE_NODE, 5);
 				CO_STATIC_UINT32_ATTRIBUTE(ENTITY_NODE, 6);
 				CO_STATIC_UINT32_ATTRIBUTE(PROCESSING_INSTRUCTION_NODE, 7);
@@ -34,36 +35,39 @@ namespace cpp {
 
 				CO_PRIMITIVE_GETTER(nodeType, v8::Integer);
 
-				CO_READONLY_ATTRIBUTE(nodeName);
+				CO_READONLY_ATTRIBUTE(nodeName, v8::Local<v8::String>);
 
+				//TODO
 				CO_READONLY_ATTRIBUTE(baseURI, v8::Local<v8::String>);
 
-				CO_READONLY_ATTRIBUTE(isConnected) {
-					return this->getRootNode_METHOD(context, true)->nodeType == 9;
-				}
+				CO_READONLY_ATTRIBUTE(isConnected, v8::Local<v8::Boolean>);
 
-				CO_READONLY_ATTRIBUTE(ownerDocument) {
+				CO_READONLY_ATTRIBUTE(ownerDocument, auto) {
 					return reinterpret_cast<NodeContextObject*>(nodeDocument.pin(context->GetIsolate()).native) == this ? pins::NullPin<DocumentContextObject>::null(context->GetIsolate()) : nodeDocument.pin(context->GetIsolate());
 				}
 
-				CO_METHOD(getRootNode, pins::Pin<NodeContextObject>, bool composed);
+				void setDocument(v8::Local<v8::Context> context, pins::Pin<DocumentContextObject> document) {
+					this->nodeDocument.set(context->GetIsolate(), document);
+				}
+
+				CO_METHOD(getRootNode, pins::Pin<NodeContextObject>, pins::Pin<NodeContextObject> self, bool composed);
 
 				CO_PIN_GETTER(parent);
 
-				CO_READONLY_ATTRIBUTE(parentElement) {
+				CO_READONLY_ATTRIBUTE(parentElement, auto) {
 					auto local = this->parent.pin(context->GetIsolate());
 					return (local && local.pin()->nodeType == 1) ? local.cast<ElementContextObject>() : pins::NullPin<ElementContextObject>::null(context->GetIsolate());
 				}
 
-				CO_READONLY_ATTRIBUTE(hasChildNodes) {
+				CO_READONLY_ATTRIBUTE(hasChildNodes, auto) {
 					return v8::Boolean::New(context->GetIsolate(), !!this->childNodes.pin(context->GetIsolate())->size());
 				}
 				CO_PIN_GETTER(childNodes);
-				CO_READONLY_ATTRIBUTE(firstChild) {
+				CO_READONLY_ATTRIBUTE(firstChild, auto) {
 					auto pin = this->childNodes_GET(context);
 					return pin->size() ? pin->operator[](0).pin(context->GetIsolate()) : pins::NullPin<NodeContextObject>::null(context->GetIsolate());
 				}
-				CO_READONLY_ATTRIBUTE(lastChild) {
+				CO_READONLY_ATTRIBUTE(lastChild, auto) {
 					auto pin = this->childNodes_GET(context);
 					return pin->size() ? pin->operator[](pin->size() - 1).pin(context->GetIsolate()) : pins::NullPin<NodeContextObject>::null(context->GetIsolate());
 				}
@@ -71,13 +75,33 @@ namespace cpp {
 				CO_PIN_GETTER(previousSibling);
 				CO_PIN_GETTER(nextSibling);
 
+				void setPrevSibling(v8::Local<v8::Context> context, pins::NullPin<NodeContextObject> node) {
+					this->previousSibling.set(context->GetIsolate(), node);
+				}
+				void setNextSibling(v8::Local<v8::Context> context, pins::NullPin<NodeContextObject> node) {
+					this->nextSibling.set(context->GetIsolate(), node);
+				}
+				void dropSiblings(v8::Local<v8::Context> context) {
+					this->previousSibling.reset(context->GetIsolate());
+					this->nextSibling.reset(context->GetIsolate());
+				}
+
 				CO_ATTRIBUTE(nodeValue, v8::Local<v8::Value>);
 				CO_ATTRIBUTE(textContent, v8::Local<v8::Value>);
+				//TODO
 				CO_METHOD(normalize, void);
 
-				CO_METHOD(cloneNode, pins::Pin<NodeContextObject>, bool deep);
+				CO_METHOD(cloneNode, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> self, bool deep) {
+					if (this->domTypeof(DOMType::ShadowRoot)) {
+						//TODO throw exception
+						return {};
+					}
+					return { mutation_algorithms::clone(self, pins::NullPin<DocumentContextObject>::null(context->GetIsolate()), deep) };
+				}
 				CO_METHOD(isEqualNode, bool, pins::NullPin<NodeContextObject> otherNode);
-				CO_METHOD(isSameNode, bool, pins::NullPin<NodeContextObject> otherNode);
+				CO_METHOD(isSameNode, bool, pins::NullPin<NodeContextObject> otherNode) {
+					return otherNode.native == this;
+				}
 
 				CO_STATIC_UINT32_ATTRIBUTE(DOCUMENT_POSITION_DISCONNECTED, 1 << 0);
 				CO_STATIC_UINT32_ATTRIBUTE(DOCUMENT_POSITION_PRECEDING, 1 << 1);
@@ -85,11 +109,12 @@ namespace cpp {
 				CO_STATIC_UINT32_ATTRIBUTE(DOCUMENT_POSITION_CONTAINS, 1 << 3);
 				CO_STATIC_UINT32_ATTRIBUTE(DOCUMENT_POSITION_CONTAINED_BY, 1 << 4);
 				CO_STATIC_UINT32_ATTRIBUTE(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC, 1 << 5);
-				CO_METHOD(compareDocumentPosition, v8::Local<v8::Integer>, pins::Pin<NodeContextObject> other);
+
+				CO_METHOD(compareDocumentPosition, v8::Local<v8::Integer>, pins::Pin<NodeContextObject> self, pins::Pin<NodeContextObject> other);
 				CO_METHOD(contains, v8::Local<v8::Boolean>, pins::NullPin<NodeContextObject> other);
 
-				CO_METHOD(lookupPrefix, v8::Local<v8::Value>, v8::Local<v8::Value> ns);
-				CO_METHOD(lookupNamespaceURI, v8::Local<v8::Value>, v8::Local<v8::Value> prefix);
+				CO_METHOD(lookupPrefix, v8::Local<v8::Value>, v8::Local<v8::String> ns);
+				CO_METHOD(lookupNamespaceURI, v8::Local<v8::Value>, v8::Local<v8::String> prefix);
 				CO_METHOD(isDefaultNamespace, v8::Local<v8::Boolean>, v8::Local<v8::Value> ns);
 
 				CO_METHOD(insertBefore, std::optional<pins::Pin<NodeContextObject>>, pins::Pin<NodeContextObject> self, pins::Pin<NodeContextObject> node, pins::NullPin<NodeContextObject> child) {
@@ -105,12 +130,18 @@ namespace cpp {
 					return mutation_algorithms::preRemove(context, node, self);
 				}
 
+				//TODO
 				virtual pins::NullPin<EventTargetContextObject> getTheParent(v8::Local<v8::Context> context, pins::Pin<EventContextObject> event);
+
+				auto type() {
+					return this->nodeType;
+				}
 
 				auto& getObservers() {
 					return this->registeredObserverList;
 				}
 
+				//TODO
 				void queueMutationRecord(v8::Local<v8::String> type, pins::Pin<NodeContextObject> target, v8::Local<v8::String> name, v8::Local<v8::String> ns, v8::Local<v8::String> oldValue, pins::Pin<NodeListContextObject> addedNodes, pins::Pin<NodeListContextObject> removedNodes, pins::NullPin<NodeContextObject> previousSibling, pins::NullPin<NodeContextObject> nextSibling);
 
 				pins::NullPin<nodes::NodeContextObject> commonAncestor(v8::Local<v8::Context> context, pins::Pin<nodes::NodeContextObject> self, pins::Pin<NodeContextObject> other) {
@@ -140,6 +171,8 @@ namespace cpp {
 				pins::Property<NodeListContextObject> childNodes;
 				pins::NullProperty<NodeContextObject> previousSibling;
 				pins::NullProperty<NodeContextObject> nextSibling;
+
+				friend class StackDescendantIterator;
 			};
 		}
 	}

@@ -7,8 +7,8 @@ namespace cpp {
 	namespace dom {
 		class NamedNodeMapContextObject : public DOMContextObject {
 		public:
-			CO_READONLY_ATTRIBUTE(length) {
-				return v8::Integer::New(context->GetIsolate(), this->attributeList.size());
+			CO_READONLY_ATTRIBUTE(length, v8::Local<v8::Integer>) {
+				return v8::Integer::New(context->GetIsolate(), static_cast<int32_t>(this->attributeList.size()));
 			}
 			CO_METHOD(item, pins::NullPin<nodes::AttrContextObject>, unsigned long index) {
 				return index < this->attributeList.size() ? this->attributeList[index].pin(context->GetIsolate()) : pins::NullPin<nodes::AttrContextObject>::null(context->GetIsolate());
@@ -19,6 +19,10 @@ namespace cpp {
 			CO_METHOD(setNamedItemNS, pins::NullPin<nodes::AttrContextObject>, pins::Pin<nodes::AttrContextObject> attr);
 			CO_METHOD(removeNamedItem, pins::Pin<nodes::AttrContextObject>, v8::Local<v8::String> qualifiedName);
 			CO_METHOD(removeNamedItemNS, pins::Pin<nodes::AttrContextObject>, v8::Local<v8::Value> ns, v8::Local<v8::String> localName);
+
+			auto& getAttributeList() {
+				return this->attributeList;
+			}
 		private:
 			pins::Property<nodes::ElementContextObject> element;
 			std::vector<pins::Property<nodes::AttrContextObject>> attributeList;

@@ -10,12 +10,12 @@ namespace cpp {
 		}
 
 		class HTMLCollectionContextObject : public DOMContextObject {
-
+		public:
 			CO_METHOD(item, pins::NullPin<nodes::ElementContextObject>, unsigned long index) {
 				return index < this->elements.size() ? this->elements[index].pin(context->GetIsolate()) : pins::NullPin<nodes::ElementContextObject>::null(context->GetIsolate());
 			}
 
-			CO_READONLY_ATTRIBUTE(length) {
+			CO_READONLY_ATTRIBUTE(length, v8::Local<v8::Integer>) {
 				return v8::Integer::New(context->GetIsolate(), static_cast<int32_t>(this->elements.size()));
 			}
 

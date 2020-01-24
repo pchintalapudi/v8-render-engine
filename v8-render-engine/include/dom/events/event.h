@@ -39,7 +39,7 @@ namespace cpp {
 			CO_PRIMITIVE_GETTER(isTrusted, v8::Boolean);
 			CO_PRIMITIVE_GETTER(timeStamp, v8::Number);
 
-			CO_READONLY_ATTRIBUTE(defaultPrevented) {
+			CO_READONLY_ATTRIBUTE(defaultPrevented, v8::Local<v8::Boolean>) {
 				return v8::Boolean::New(context->GetIsolate(), this->canceled);
 			}
 
@@ -50,7 +50,7 @@ namespace cpp {
 				}
 			}
 
-			CO_INLINE_ATTRIBUTE_GETTER(cancelBubble) {
+			CO_INLINE_ATTRIBUTE_GETTER(cancelBubble, v8::Local<v8::Boolean>) {
 				return v8::Boolean::New(context->GetIsolate(), this->stopPropagation);
 			}
 
@@ -60,7 +60,7 @@ namespace cpp {
 				}
 			}
 
-			CO_INLINE_ATTRIBUTE_GETTER(returnValue) {
+			CO_INLINE_ATTRIBUTE_GETTER(returnValue, v8::Local<v8::Boolean>) {
 				return v8::Boolean::New(context->GetIsolate(), this->canceled);
 			}
 
@@ -188,5 +188,7 @@ namespace cpp {
 			bool dispatch;
 			bool isTrusted;
 		};
+
+		pins::NullPin<EventTargetContextObject> retarget(v8::Local<v8::Context> context, pins::NullPin<EventTargetContextObject> a, pins::Pin<EventTargetContextObject> b);
 	}
 }

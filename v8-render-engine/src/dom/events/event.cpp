@@ -1,5 +1,5 @@
-#include "dom/events/event.h"
-
+#include "dom/nodes/shadow_root.h"
+#include "dom/nodes/element.h"
 using namespace cpp::dom;
 
 v8::Local<v8::Array> EventContextObject::composedPath_METHOD(v8::Local<v8::Context> context) {
@@ -84,4 +84,21 @@ CO_METHOD(EventContextObject::initEvent, void, v8::Local<v8::String> type, bool 
 		this->bubbles = bubbles;
 		this->cancelable = cancelable;
 	}
+}
+
+cpp::pins::NullPin<EventTargetContextObject> cpp::dom::retarget(v8::Local<v8::Context> context, pins::NullPin<EventTargetContextObject> a, pins::Pin<EventTargetContextObject> b)
+{
+	auto bnode = b->domTypeof(DOMType::Node);
+	while (a && a.pin()->domTypeof(DOMType::Node)) {
+		auto pinned = a.pin().downcast<nodes::NodeContextObject>();
+		auto root = pinned->getRootNode_METHOD(context, pinned, false);
+		if (!root->domTypeof(DOMType::ShadowRoot)) {
+			return a;
+		}
+		if (bnode && b.downcast<nodes::NodeContextObject>()->commonAncestor(context, b.downcast<nodes::NodeContextObject>(), pinned) == a) {
+			return a;
+		}
+		a = root.downcast<nodes::ShadowRootContextObject>()->host_GET(context).cast<EventTargetContextObject>();
+	}
+	return a;
 }

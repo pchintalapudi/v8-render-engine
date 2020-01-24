@@ -26,6 +26,10 @@ namespace cpp {
 			bool operator!=(const MutationObserverInit& other) const {
 				return !this->operator==(other);
 			}
+
+			MutationObserverInit clone(v8::Local<v8::Context> context) {
+				return { childList, attributes, characterData, subtree, attributeOldValue, characterDataOldValue, v8::UniquePersistent<v8::Array>(context->GetIsolate(), attributeFilter.Get(context->GetIsolate())) };
+			}
 		};
 
 		class MutationObserverContextObject : public DOMContextObject {

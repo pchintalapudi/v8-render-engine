@@ -9,7 +9,7 @@ namespace cpp {
 
 		class AbortSignalContextObject : DOMContextObject {
 
-			CO_READONLY_ATTRIBUTE(aborted) { return v8::Boolean::New(context->GetIsolate(), this->aborted); }
+			CO_PRIMITIVE_GETTER(aborted, v8::Boolean);
 
 			void addAlgorithm(v8::Local<v8::Context> context, v8::Local<v8::Function> algorithm) {
 				if (!this->aborted) {

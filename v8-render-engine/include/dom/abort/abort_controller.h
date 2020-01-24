@@ -8,7 +8,7 @@ namespace cpp {
 
 		class AbortControllerContextObject : public DOMContextObject {
 		public:
-			CO_READONLY_ATTRIBUTE(signal) {
+			CO_READONLY_ATTRIBUTE(signal, pins::Pin<AbortSignalContextObject>) {
 				return signal.pin(context->GetIsolate());
 			}
 

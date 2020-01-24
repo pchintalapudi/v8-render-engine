@@ -52,6 +52,11 @@ namespace cpp {
 			std::enable_if_t<std::is_base_of_v<Other, Type>, Pin<Other>&> cast() {
 				return reinterpret_cast<Pin<Other>&>(*this);
 			}
+
+			template<typename Other>
+			std::enable_if_t<std::is_base_of_v<Type, Other> or std::is_base_of_v<Other, Type>, Pin<Other>&> downcast() {
+				return reinterpret_cast<Pin<Other>&>(*this);
+			}
 		};
 
 		template<typename Type>
@@ -124,7 +129,7 @@ namespace cpp {
 			}
 
 			void set(v8::Isolate* isolate, Pin<Type> local) {
-				this->handle.Reset(isolate, local.handle);
+				this->handle.Reset(isolate, local.handle.As<v8::Object>());
 				this->native = local.native;
 			}
 		};

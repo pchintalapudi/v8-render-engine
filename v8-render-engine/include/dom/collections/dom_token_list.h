@@ -7,8 +7,8 @@ namespace cpp {
 	namespace dom {
 		class DOMTokenListContextObject : public DOMContextObject {
 		public:
-			CO_READONLY_ATTRIBUTE(length) {
-				return v8::Uint32::New(context->GetIsolate(), this->strings.size());
+			CO_READONLY_ATTRIBUTE(length, v8::Local<v8::Integer>) {
+				return v8::Uint32::New(context->GetIsolate(), static_cast<int32_t>(this->strings.size()));
 			}
 
 			CO_METHOD(item, v8::Local<v8::Value>, uint32_t index) {

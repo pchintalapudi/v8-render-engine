@@ -10,7 +10,7 @@ namespace cpp {
 		}
 
 		class RangeContextObject : public AbstractRangeContextObject {
-			CO_READONLY_ATTRIBUTE(commonAncestorContainer) {
+			CO_READONLY_ATTRIBUTE(commonAncestorContainer, auto) {
 				auto start = this->startContainer.pin(context->GetIsolate());
 				return start->commonAncestor(context, start, this->endContainer.pin(context->GetIsolate()));
 			}

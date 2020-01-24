@@ -10,8 +10,8 @@ namespace cpp {
 
 				MIXIN_DOCUMENT_OR_SHADOW_ROOT
 
-				CO_READONLY_ATTRIBUTE(mode) {
-					return v8::String::NewFromUtf8(context->GetIsolate(), this->closed ? "closed" : "open", v8::NewStringType::kNormal, this->closed ? 6 : 4);
+				CO_READONLY_ATTRIBUTE(mode, v8::Local<v8::String>) {
+					return v8::String::NewFromUtf8(context->GetIsolate(), this->closed ? "closed" : "open", v8::NewStringType::kNormal, this->closed ? 6 : 4).ToLocalChecked();
 				}
 				CO_PIN_GETTER(host);
 				virtual pins::NullPin<EventTargetContextObject> getTheParent(v8::Local<v8::Context> context, pins::Pin<EventContextObject> event);

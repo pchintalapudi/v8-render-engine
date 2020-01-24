@@ -6,11 +6,48 @@
 
 namespace cpp {
 	namespace dom {
-		enum class DOMType { __COUNT__ };
+		enum class DOMType {
+			Event,
+			EventTarget,
+			AbortController,
+			AbortSignal,
+			NodeList,
+			HTMLCollection,
+			MutationObserver,
+			MutationRecord,
+			Node,
+			Document,
+			XMLDocument,
+			DOMImplementation,
+			DocumentType,
+			DocumentFragment,
+			ShadowRoot,
+			Element,
+			NamedNodeMap,
+			Attr,
+			CharacterData,
+			Text,
+			CDATASection,
+			ProcessingInstruction,
+			Comment,
+			AbstractRange,
+			StaticRange,
+			Range,
+			NodeIterator,
+			TreeWalker,
+			NodeFilter,
+			DOMTokenList,
+			XPathResult,
+			XPathExpression,
+			XPathNSResolver,
+			XPathEvaluatorBase,
+			XPathEvaluator,
+			__COUNT__
+		};
 
 		class DOMContextObject : public obj::BaseContextObject {
 		public:
-			bool typeof(DOMType type) {
+			bool domTypeof(DOMType type) {
 				return this->types.contains(type);
 			}
 		private:

@@ -1,4 +1,4 @@
-#include "dom/events/event_target.h"
+#include "dom/nodes/shadow_root.h"
 
 using namespace cpp::dom;
 CO_METHOD(EventTargetContextObject::addEventListener, void, v8::Local<v8::String> type, v8::Local<v8::Function> callback, bool capture, bool passive, bool once) {
@@ -92,11 +92,7 @@ bool innerInvoke(v8::Local<v8::Context> context, cpp::pins::Pin<EventContextObje
 				if (passive->BooleanValue(context->GetIsolate())) {
 					event->passive(true);
 				}
-				//Execution Scope
-				{
-					v8::TryCatch scope(context->GetIsolate());
-					//TODO execute listener
-				}
+				//TODO call function
 				event->passive(false);
 				//TODO Globals
 				if (event->isImmediateStop()) {
@@ -141,9 +137,13 @@ void invoke(v8::Local<v8::Context> context, EventContextObject::PathStruct& path
 
 EventContextObject::PathStruct& appendToEventPath(v8::Local<v8::Context> context, cpp::pins::Pin<EventContextObject> event, cpp::pins::Pin<EventTargetContextObject> invocationTarget, cpp::pins::NullPin<EventTargetContextObject> shadowAdjustedTarget, cpp::pins::NullPin<EventTargetContextObject> relatedTarget, std::vector<cpp::pins::NullProperty<EventTargetContextObject>> touchTargets, bool slotInClosedTree) {
 	auto invocationTargetInShadowTree = false;
-	//TODO invocationTargetInShadowTree handling
+	if (invocationTarget->domTypeof(DOMType::Node) && invocationTarget.downcast<nodes::NodeContextObject>()->getRootNode_METHOD(context, invocationTarget.downcast<nodes::NodeContextObject>(), false)->domTypeof(DOMType::ShadowRoot)) {
+		invocationTargetInShadowTree = true;
+	}
 	auto rootOfClosedTree = false;
-	//TODO rootOfClosedTree handling
+	if (invocationTarget->domTypeof(DOMType::ShadowRoot) && invocationTarget.downcast<nodes::ShadowRootContextObject>()->isClosed()) {
+		rootOfClosedTree = true;
+	}
 	EventContextObject::PathStruct p = { cpp::pins::Property<EventTargetContextObject>(context->GetIsolate(), invocationTarget), invocationTargetInShadowTree, cpp::pins::NullProperty<EventTargetContextObject>(context->GetIsolate(), shadowAdjustedTarget), cpp::pins::NullProperty<EventTargetContextObject>(context->GetIsolate(), relatedTarget), std::move(touchTargets), rootOfClosedTree, slotInClosedTree };
 	event->getPath().push_back(std::move(p));
 	return event->getPath().back();
@@ -153,15 +153,13 @@ bool dispatchEvent(v8::Local<v8::Context> context, cpp::pins::Pin<EventContextOb
 	event->setDispatch(false);
 	auto targetOverride = target;//TODO legacyTargetOverride
 	auto activationTarget = cpp::pins::NullPin<EventTargetContextObject>::null(context->GetIsolate());
-	//TODO retarget
-	auto relatedTarget = event->related(context);
+	auto relatedTarget = retarget(context, event->related(context), target);
 	if (target != relatedTarget || event->related(context) == target) {
 		std::vector<cpp::pins::NullProperty<EventTargetContextObject>> touchTargets;
 		if (event->touchTargets()) {
 			for (auto& prop : *event->touchTargets()) {
 				auto touchTarget = prop.pin(context->GetIsolate());
-				//TODO retarget
-				touchTargets.emplace_back(context->GetIsolate(), touchTarget);
+				touchTargets.emplace_back(context->GetIsolate(), retarget(context, touchTarget, target));
 			}
 		}
 		auto cap_shadows = std::vector<EventContextObject::PathStruct*>();
@@ -180,19 +178,22 @@ bool dispatchEvent(v8::Local<v8::Context> context, cpp::pins::Pin<EventContextOb
 			if (slotable) {
 				//TODO assert parent is a slot
 				slotable.reset(context->GetIsolate());
-				//TODO shadow tree
-				slotInClosedTree = false;
+				auto pinned = parent.pin();
+				if (pinned->domTypeof(DOMType::Node)) {
+					auto root = pinned.downcast<nodes::NodeContextObject>()->getRootNode_METHOD(context, pinned.downcast<nodes::NodeContextObject>(), false);
+					if (root->domTypeof(DOMType::ShadowRoot) && root.downcast<nodes::ShadowRootContextObject>()->isClosed()) {
+						slotInClosedTree = true;
+					}
+				}
 			}
 			//TODO slots
 			slotable = slotable;
-			//TODO retarget
-			relatedTarget = relatedTarget;
+			relatedTarget = retarget(context, event->related(context), parent.pin());
 			touchTargets = std::vector<cpp::pins::NullProperty<EventTargetContextObject>>();
 			if (event->touchTargets()) {
 				for (auto& prop : *event->touchTargets()) {
 					auto touchTarget = prop.pin(context->GetIsolate());
-					//TODO retarget
-					touchTargets.emplace_back(context->GetIsolate(), touchTarget);
+					touchTargets.emplace_back(context->GetIsolate(), retarget(context, touchTarget, parent.pin()));
 				}
 			}
 			//TODO activation

@@ -16,7 +16,6 @@ namespace cpp {
 			v8::UniquePersistent<v8::String> host;
 			v8::UniquePersistent<v8::String> username;
 			v8::UniquePersistent<v8::String> password;
-			v8::UniquePersistent<v8::String> host;
 			enum class HostType {
 				HOST_DOMAIN, IPV4, IPV6, OPAQUE_HOST, EMPTY_HOST, HOST_NULL
 			};

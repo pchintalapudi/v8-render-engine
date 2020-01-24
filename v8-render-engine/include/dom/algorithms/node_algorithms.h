@@ -8,6 +8,7 @@ namespace cpp {
 	namespace dom {
 		namespace nodes {
 			class NodeContextObject;
+			class DocumentContextObject;
 		}
 
 		namespace mutation_algorithms {
@@ -28,7 +29,11 @@ namespace cpp {
 
 			std::optional<pins::Pin<nodes::NodeContextObject>> preRemove(v8::Local<v8::Context> context, pins::Pin<nodes::NodeContextObject> child, pins::Pin<nodes::NodeContextObject> parent);
 
-			void remove(pins::Pin<nodes::NodeContextObject> node, bool suppressObserversFlag);
+			void remove(v8::Local<v8::Context> context, pins::Pin<nodes::NodeContextObject> node, bool suppressObserversFlag, bool doErasure=true);
+
+			void adopt(v8::Local<v8::Context> context, pins::Pin<nodes::NodeContextObject> node, pins::Pin<nodes::DocumentContextObject> document);
+
+			pins::Pin<nodes::NodeContextObject> clone(pins::Pin<nodes::NodeContextObject> node, pins::NullPin<nodes::DocumentContextObject> document, bool cloneChildren);
 		}
 	}
 }
